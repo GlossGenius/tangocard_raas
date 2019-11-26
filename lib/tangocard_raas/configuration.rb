@@ -10,6 +10,9 @@ OpenAPI Generator version: 4.2.2-SNAPSHOT
 
 =end
 
+require 'openssl'
+require 'certifi'
+
 module TangocardRaas
   class Configuration
     # Defines url scheme
@@ -129,8 +132,8 @@ module TangocardRaas
       @timeout = 0
       @client_side_validation = true
       @ssl_verify = true
-      @ssl_verify_mode = nil
-      @ssl_ca_file = nil
+      @ssl_verify_mode = OpenSSL::SSL::VERIFY_PEER
+      @ssl_ca_file = Certifi.where
       @ssl_client_cert = nil
       @ssl_client_key = nil
       @debugging = false

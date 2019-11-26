@@ -124,8 +124,8 @@ module TangocardRaas
     attr_accessor :force_ending_format
 
     def initialize
-      @scheme = 'http'
-      @host = 'integration-api.tangocard.com'
+      @scheme = 'https'
+      @host = 'integration-api.tangocard.com:443'
       @base_path = '/raas/v2'
       @api_key = {}
       @api_key_prefix = {}

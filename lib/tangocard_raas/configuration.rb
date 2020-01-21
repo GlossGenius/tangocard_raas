@@ -15,6 +15,10 @@ require 'certifi'
 
 module TangocardRaas
   class Configuration
+    class << self
+      attr_accessor :environment
+    end
+
     # Defines url scheme
     attr_accessor :scheme
 
@@ -123,9 +127,25 @@ module TangocardRaas
 
     attr_accessor :force_ending_format
 
-    def initialize
+    DEFAULT_ENVIRONMENT = :sandbox
+    ENVIRONMENTS = {
+      sandbox: {
+        host: 'integration-api.tangocard.com:443',
+        username: 'QAPlatform2',
+        password: 'apYPfT6HNONpDRUj3CLGWYt7gvIHONpDRUYPfT6Hj',
+      }.freeze,
+      production: {
+        host: 'api.tangocard.com:443',
+        username: nil,
+        password: nil,
+      }.freeze,
+    }.freeze
+
+    def initialize(environment)
       @scheme = 'https'
-      @host = 'integration-api.tangocard.com:443'
+      @host = ENVIRONMENTS.dig(environment, :host)
+      @username = ENVIRONMENTS.dig(environment, :username)
+      @production = ENVIRONMENTS.dig(environment, :password)
       @base_path = '/raas/v2'
       @api_key = {}
       @api_key_prefix = {}
@@ -146,7 +166,7 @@ module TangocardRaas
 
     # The default Configuration object.
     def self.default
-      @@default ||= Configuration.new
+      @@default ||= Configuration.new(environment || DEFAULT_ENVIRONMENT)
     end
 
     def configure
@@ -205,8 +225,8 @@ module TangocardRaas
     def server_settings
       [
         {
-          url: "//integration-api.tangocard.com/raas/v2",
-          description: "No descriptoin provided",
+          url: "#{base_url}",
+          description: "No description provided",
         }
       ]
     end
@@ -219,7 +239,7 @@ module TangocardRaas
       servers = server_settings
 
       # check array index out of bound
-      if (index < 0 || index >= servers.size)
+      if index < 0 || index >= servers.size
         fail ArgumentError, "Invalid index #{index} when selecting the server. Must be less than #{servers.size}"
       end
 
@@ -229,10 +249,12 @@ module TangocardRaas
       # go through variable and assign a value
       server[:variables].each do |name, variable|
         if variables.key?(name)
-          if (server[:variables][name][:enum_values].include? variables[name])
+          if server[:variables][name][:enum_values].include?(variables[name])
             url.gsub! "{" + name.to_s + "}", variables[name]
           else
-            fail ArgumentError, "The variable `#{name}` in the server URL has invalid value #{variables[name]}. Must be #{server[:variables][name][:enum_values]}."
+            error_message = "The variable `#{name}` in the server URL has invalid value #{variables[name]}. " \
+                            "Must be #{server[:variables][name][:enum_values]}."
+            fail ArgumentError, error_message
           end
         else
           # use default value

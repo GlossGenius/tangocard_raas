@@ -166,7 +166,8 @@ module TangocardRaas
 
     # The default Configuration object.
     def self.default
-      @@default ||= Configuration.new(environment || DEFAULT_ENVIRONMENT)
+      predefined_environment = ENVIRONMENTS.keys.include?(environment) ? environment : DEFAULT_ENVIRONMENT
+      @@default ||= Configuration.new(predefined_environment)
     end
 
     def configure

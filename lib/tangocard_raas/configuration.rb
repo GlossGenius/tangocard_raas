@@ -145,7 +145,7 @@ module TangocardRaas
       @scheme = 'https'
       @host = ENVIRONMENTS.dig(environment, :host)
       @username = ENVIRONMENTS.dig(environment, :username)
-      @production = ENVIRONMENTS.dig(environment, :password)
+      @password = ENVIRONMENTS.dig(environment, :password)
       @base_path = '/raas/v2'
       @api_key = {}
       @api_key_prefix = {}
